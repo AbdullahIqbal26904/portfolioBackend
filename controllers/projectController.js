@@ -81,7 +81,32 @@ const addProject = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
-
+const getProject = async (req,res) => {
+    try{
+        const { id } = req.params;
+        console.log('Fetching skills from database...');
+        const projs = await User.aggregate([
+            {
+                $match: { _id: new mongoose.Types.ObjectId(id) }
+            },
+            {
+                $unwind: "$projects"
+            },
+            {
+                $project: {
+                    projects: 1,
+                    _id: 0
+                }
+            }
+        ]);
+        console.log('Projects fetched:', projs);
+        res.json(projs);
+    }catch(err){
+        console.error('Error fetching skills:', err.message);
+        res.status(500).json({ message: err.message });
+    }
+}
 module.exports = {
     addProject,
+    getProject,
 };
